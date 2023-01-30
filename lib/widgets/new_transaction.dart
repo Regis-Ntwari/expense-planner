@@ -49,6 +49,20 @@ class _NewTransactionState extends State<NewTransaction> {
                 keyboardType: TextInputType.number,
                 onSubmitted: (_) => submitData(),
               ),
+              Container(
+                height: 70,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('No date chosen'),
+                    OutlinedButton(
+                        onPressed: () {},
+                        child: Text('Choose Date',
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColorDark)))
+                  ],
+                ),
+              ),
               OutlinedButton(
                 onPressed: () => widget.addNewTransaction(
                     titleController.text, double.parse(amountController.text)),
