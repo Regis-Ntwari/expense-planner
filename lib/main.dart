@@ -69,6 +69,12 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
         });
   }
 
+  void deleteTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((element) => element.id == id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +93,7 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
           children: [
             // ignore: sized_box_for_whitespace
             Chart(_recentTransactions),
-            TransactionList(_transactions)
+            TransactionList(_transactions, this.deleteTransaction)
           ],
         ),
       ),
