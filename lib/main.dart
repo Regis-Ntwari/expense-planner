@@ -48,12 +48,13 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
     }).toList();
   }
 
-  void _addNewTransaction(String txTitle, double txAmount) {
+  void _addNewTransaction(
+      String txTitle, double txAmount, DateTime chosenDate) {
     Transaction newTransaction = Transaction(
         id: DateTime.now().toString(),
         title: txTitle,
         price: txAmount,
-        date: DateTime.now());
+        date: chosenDate);
 
     setState(() {
       _transactions.add(newTransaction);
