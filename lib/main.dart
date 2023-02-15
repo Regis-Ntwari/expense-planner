@@ -77,23 +77,35 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = AppBar(
+      title: Text('Expense Planner'),
+      backgroundColor: Theme.of(context).primaryColorDark,
+      actions: [
+        IconButton(
+            onPressed: () => startAddNewTransaction(context),
+            icon: Icon(Icons.add))
+      ],
+    );
+    print(MediaQuery.of(context).size.height);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Expense Planner'),
-        backgroundColor: Theme.of(context).primaryColorDark,
-        actions: [
-          IconButton(
-              onPressed: () => startAddNewTransaction(context),
-              icon: Icon(Icons.add))
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ignore: sized_box_for_whitespace
-            Chart(_recentTransactions),
-            TransactionList(_transactions, this.deleteTransaction)
+            Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.3,
+                child: Chart(_recentTransactions)),
+            Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.7,
+                child: TransactionList(_transactions, deleteTransaction))
           ],
         ),
       ),
