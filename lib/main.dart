@@ -4,7 +4,13 @@ import 'package:expense_planner/widgets/new_transaction.dart';
 import 'package:expense_planner/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  //setting only portrait mode
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -42,12 +48,16 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
     // Transaction(id: 'S2', title: 'Shirts', price: 14.99, date: DateTime.now()),
   ];
 
+  bool _showChart = false;
+
+  //transactions in the past 7 days
   List<Transaction> get _recentTransactions {
     return _transactions.where((tx) {
       return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
   }
 
+  //function to add a new transaction in the list of transations
   void _addNewTransaction(
       String txTitle, double txAmount, DateTime chosenDate) {
     Transaction newTransaction = Transaction(
@@ -61,6 +71,7 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
     });
   }
 
+  // method to show the bottom sheet when adding a transaction
   void startAddNewTransaction(BuildContext ctx) {
     showModalBottomSheet(
         context: ctx,
@@ -69,6 +80,7 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
         });
   }
 
+  // method to delete a transaction
   void deleteTransaction(String id) {
     setState(() {
       _transactions.removeWhere((element) => element.id == id);
@@ -86,26 +98,53 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
             icon: Icon(Icons.add))
       ],
     );
-    print(MediaQuery.of(context).size.height);
+
+    final listWidget = Container(
+        height: (MediaQuery.of(context).size.height -
+                appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top) *
+            0.7,
+        child: TransactionList(_transactions, deleteTransaction));
+
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     return Scaffold(
       appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isLandscape)
+              Row(
+                children: [
+                  Text('Show Chart'),
+                  Switch(
+                      value: _showChart,
+                      onChanged: (val) {
+                        setState(() {
+                          _showChart = val;
+                        });
+                      })
+                ],
+              ),
             // ignore: sized_box_for_whitespace
-            Container(
-                height: (MediaQuery.of(context).size.height -
-                        appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.3,
-                child: Chart(_recentTransactions)),
-            Container(
-                height: (MediaQuery.of(context).size.height -
-                        appBar.preferredSize.height -
-                        MediaQuery.of(context).padding.top) *
-                    0.7,
-                child: TransactionList(_transactions, deleteTransaction))
+            if (!isLandscape)
+              Container(
+                  height: (MediaQuery.of(context).size.height -
+                          appBar.preferredSize.height -
+                          MediaQuery.of(context).padding.top) *
+                      0.3,
+                  child: Chart(_recentTransactions)),
+            if (!isLandscape) listWidget,
+            if (isLandscape)
+              _showChart
+                  ? Container(
+                      height: (MediaQuery.of(context).size.height -
+                              appBar.preferredSize.height -
+                              MediaQuery.of(context).padding.top) *
+                          0.8,
+                      child: Chart(_recentTransactions))
+                  : listWidget
           ],
         ),
       ),

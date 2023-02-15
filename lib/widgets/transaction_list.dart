@@ -12,21 +12,23 @@ class TransactionList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: transactions.isEmpty
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "No Transactions added",
-                  style: ThemeData.light().textTheme.titleMedium,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                    width: 200,
-                    child: Image.asset('assets/images/nothing.jpeg'))
-              ],
-            )
+          ? LayoutBuilder(builder: (builder, constarints) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "No Transactions added",
+                    style: ThemeData.light().textTheme.titleMedium,
+                  ),
+                  SizedBox(
+                    height: constarints.maxHeight * 0.1,
+                  ),
+                  SizedBox(
+                      width: constarints.maxHeight * 0.7,
+                      child: Image.asset('assets/images/nothing.jpeg'))
+                ],
+              );
+            })
           : ListView.builder(
               itemBuilder: (context, index) {
                 return Card(
