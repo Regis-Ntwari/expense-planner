@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:expense_planner/models/transaction.dart';
 import 'package:expense_planner/widgets/chart.dart';
 import 'package:expense_planner/widgets/new_transaction.dart';
 import 'package:expense_planner/widgets/transaction_list.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -89,36 +92,51 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      title: Text('Expense Planner'),
-      backgroundColor: Theme.of(context).primaryColorDark,
-      actions: [
-        IconButton(
-            onPressed: () => startAddNewTransaction(context),
-            icon: Icon(Icons.add))
-      ],
-    );
+    final mediaQuery = MediaQuery.of(context);
+    final appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text('Personal Expenses'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () => startAddNewTransaction(context),
+                  child: Icon(CupertinoIcons.add),
+                )
+              ],
+            ),
+          )
+        : AppBar(
+            title: Text('Expense Planner'),
+            backgroundColor: Theme.of(context).primaryColorDark,
+            actions: [
+              IconButton(
+                  onPressed: () => startAddNewTransaction(context),
+                  icon: Icon(Icons.add))
+            ],
+          ) as PreferredSizeWidget;
 
     final listWidget = Container(
-        height: (MediaQuery.of(context).size.height -
+        height: (mediaQuery.size.height -
                 appBar.preferredSize.height -
-                MediaQuery.of(context).padding.top) *
+                mediaQuery.padding.top) *
             0.7,
         child: TransactionList(_transactions, deleteTransaction));
-
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final bodyContent = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (isLandscape)
               Row(
                 children: [
-                  Text('Show Chart'),
-                  Switch(
+                  Text(
+                    'Show Chart',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Switch.adaptive(
+                      activeColor: Theme.of(context).primaryColor,
                       value: _showChart,
                       onChanged: (val) {
                         setState(() {
@@ -130,30 +148,43 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
             // ignore: sized_box_for_whitespace
             if (!isLandscape)
               Container(
-                  height: (MediaQuery.of(context).size.height -
+                  height: (mediaQuery.size.height -
                           appBar.preferredSize.height -
-                          MediaQuery.of(context).padding.top) *
+                          mediaQuery.padding.top) *
                       0.3,
                   child: Chart(_recentTransactions)),
             if (!isLandscape) listWidget,
             if (isLandscape)
               _showChart
                   ? Container(
-                      height: (MediaQuery.of(context).size.height -
+                      height: (mediaQuery.size.height -
                               appBar.preferredSize.height -
-                              MediaQuery.of(context).padding.top) *
+                              mediaQuery.padding.top) *
                           0.8,
                       child: Chart(_recentTransactions))
                   : listWidget
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColorDark,
-        onPressed: () => startAddNewTransaction(context),
-        child: Icon(Icons.add),
-      ),
     );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: bodyContent,
+            navigationBar: appBar as ObstructingPreferredSizeWidget,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: bodyContent,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.miniEndFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    backgroundColor: Theme.of(context).primaryColorDark,
+                    onPressed: () => startAddNewTransaction(context),
+                    child: Icon(Icons.add),
+                  ),
+          );
   }
 }

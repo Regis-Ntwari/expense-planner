@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:expense_planner/widgets/adaptive_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -83,11 +87,7 @@ class _NewTransactionState extends State<NewTransaction> {
                     children: [
                       Text(
                           'Selected Date: ${DateFormat.yMMMMd().format(_selectedDate)}'),
-                      OutlinedButton(
-                          onPressed: () => _datePicker(),
-                          child: Text('Choose Date',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColorDark)))
+                      AdaptiveButton('Choose Date', _datePicker)
                     ],
                   ),
                 ),
