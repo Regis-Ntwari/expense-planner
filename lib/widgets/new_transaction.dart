@@ -93,10 +93,7 @@ class _NewTransactionState extends State<NewTransaction> {
                   ),
                 ),
                 OutlinedButton(
-                  onPressed: () => widget.addNewTransaction(
-                      _titleController.text,
-                      double.parse(_amountController.text),
-                      _selectedDate),
+                  onPressed: () => _submitData(),
                   style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: Theme.of(context).primaryColorDark),
