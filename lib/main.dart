@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:expense_planner/models/transaction.dart';
-import 'package:expense_planner/widgets/chart.dart';
-import 'package:expense_planner/widgets/new_transaction.dart';
-import 'package:expense_planner/widgets/transaction_list.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
+import '../models/transaction.dart';
+import './widgets/chart.dart';
+import './widgets/new_transaction.dart';
+import './widgets/transaction_list.dart';
 
 void main() {
   //setting only portrait mode
@@ -90,31 +91,81 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(MediaQueryData mediaQuery,
+      PreferredSizeWidget appBar, Widget listWidget) {
+    return [
+      Row(
+        children: [
+          Text(
+            'Show Chart',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Switch.adaptive(
+              activeColor: Theme.of(context).primaryColor,
+              value: _showChart,
+              onChanged: (val) {
+                setState(() {
+                  _showChart = val;
+                });
+              })
+        ],
+      ),
+      _showChart
+          ? Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.8,
+              child: Chart(_recentTransactions))
+          : listWidget
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(MediaQueryData mediaQuery,
+      PreferredSizeWidget appBar, Widget listWidget) {
+    return [
+      Container(
+          height: (mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top) *
+              0.3,
+          child: Chart(_recentTransactions)),
+      listWidget
+    ];
+  }
+
+  PreferredSizeWidget _buildCupertinoNavigationBar() {
+    return CupertinoNavigationBar(
+      middle: Text('Personal Expenses'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => startAddNewTransaction(context),
+            child: Icon(CupertinoIcons.add),
+          )
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text('Expense Planner'),
+      backgroundColor: Theme.of(context).primaryColorDark,
+      actions: [
+        IconButton(
+            onPressed: () => startAddNewTransaction(context),
+            icon: Icon(Icons.add))
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final appBar = Platform.isIOS
-        ? CupertinoNavigationBar(
-            middle: Text('Personal Expenses'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () => startAddNewTransaction(context),
-                  child: Icon(CupertinoIcons.add),
-                )
-              ],
-            ),
-          )
-        : AppBar(
-            title: Text('Expense Planner'),
-            backgroundColor: Theme.of(context).primaryColorDark,
-            actions: [
-              IconButton(
-                  onPressed: () => startAddNewTransaction(context),
-                  icon: Icon(Icons.add))
-            ],
-          ) as PreferredSizeWidget;
+    final appBar =
+        Platform.isIOS ? _buildCupertinoNavigationBar() : _buildAppBar();
 
     final listWidget = Container(
         height: (mediaQuery.size.height -
@@ -129,40 +180,10 @@ class _ExpensePlannerState extends State<ExpensePlanner> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (isLandscape)
-              Row(
-                children: [
-                  Text(
-                    'Show Chart',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Switch.adaptive(
-                      activeColor: Theme.of(context).primaryColor,
-                      value: _showChart,
-                      onChanged: (val) {
-                        setState(() {
-                          _showChart = val;
-                        });
-                      })
-                ],
-              ),
+              ..._buildLandscapeContent(mediaQuery, appBar, listWidget),
             // ignore: sized_box_for_whitespace
             if (!isLandscape)
-              Container(
-                  height: (mediaQuery.size.height -
-                          appBar.preferredSize.height -
-                          mediaQuery.padding.top) *
-                      0.3,
-                  child: Chart(_recentTransactions)),
-            if (!isLandscape) listWidget,
-            if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (mediaQuery.size.height -
-                              appBar.preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.8,
-                      child: Chart(_recentTransactions))
-                  : listWidget
+              ..._buildPortraitContent(mediaQuery, appBar, listWidget),
           ],
         ),
       ),
